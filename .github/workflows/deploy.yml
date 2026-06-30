@@ -25,7 +25,8 @@ jobs:
             git pull origin master
             
             # 3. 환경 변수(.env) 파일 덮어쓰기 (필요시)
-            echo "${{ secrets.ENV_FILE }}" > .env
+            # GitHub Secrets에 ENV_FILE이 제대로 설정되어 있지 않으면 빈 파일이 되어 서버가 터지므로 주석 처리합니다.
+            # echo "${{ secrets.ENV_FILE }}" > .env
             
             # 4. 도커 컨테이너 빌드 및 재시작
             docker compose up -d --build
