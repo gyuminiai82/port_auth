@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  port_auth_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: port_auth_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      # DB/Redis connections will be injected via GitHub Actions or an .env file
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true
+    name: proxy-network
