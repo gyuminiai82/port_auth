@@ -34,7 +34,9 @@ function LoginForm() {
 
       // alert(`환영합니다, ${data.name}님!`);
       if (redirectUrl.startsWith('http')) {
-        window.location.href = redirectUrl;
+        const url = new URL(redirectUrl);
+        url.searchParams.set('token', data.token);
+        window.location.href = url.toString();
       } else {
         router.push(redirectUrl);
       }

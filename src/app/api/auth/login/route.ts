@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       name: user.name,
     }));
 
-    const response = NextResponse.json({ message: '로그인 성공', name: user.name }, { status: 200 });
+    const response = NextResponse.json({ message: '로그인 성공', name: user.name, token: sessionToken }, { status: 200 });
     
     const isProduction = process.env.NODE_ENV === 'production';
     
