@@ -9,8 +9,8 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirect') || '/';
   
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('test@test.com');
+  const [password, setPassword] = useState('test1234!');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -68,7 +68,7 @@ function LoginForm() {
           <input
             type="email"
             required
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
             placeholder="hello@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -80,7 +80,7 @@ function LoginForm() {
           <input
             type="password"
             required
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
