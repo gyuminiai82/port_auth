@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { redis } from '@/lib/redis';
 import { cookies } from 'next/headers';
@@ -6,11 +7,11 @@ import { cookies } from 'next/headers';
  * @swagger
  * /api/auth/logout:
  *   post:
- *     summary: 사용자 로그아웃
- *     description: 현재 로그인된 세션을 만료시키고 쿠키를 삭제합니다.
+ *     summary: ?�용??로그?�웃
+ *     description: ?�재 로그?�된 ?�션??만료?�키�?쿠키�???��?�니??
  *     responses:
  *       200:
- *         description: 로그아웃 성공
+ *         description: 로그?�웃 ?�공
  */
 export async function POST() {
   try {
@@ -22,7 +23,7 @@ export async function POST() {
       await redis.del(`session:${sessionCookie.value}`);
     }
 
-    const response = NextResponse.json({ message: '로그아웃 성공' }, { status: 200 });
+    const response = NextResponse.json({ message: '로그?�웃 ?�공' }, { status: 200 });
     
     // Delete cookie
     const isProduction = process.env.NODE_ENV === 'production';
@@ -35,6 +36,7 @@ export async function POST() {
     return response;
   } catch (error) {
     console.error('Logout error:', error);
-    return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 });
+    return NextResponse.json({ error: '?�버 ?�류가 발생?�습?�다.' }, { status: 500 });
   }
 }
+
