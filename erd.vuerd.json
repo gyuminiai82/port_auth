@@ -44,7 +44,7 @@
     "tables": [
       {
         "id": "cc1755a6-47e0-4a54-a2da-e409a8da5058",
-        "name": "MIN_User",
+        "name": "MIN_AUTH_USER",
         "comment": "사용자 정보",
         "columns": [
           {

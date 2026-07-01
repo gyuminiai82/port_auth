@@ -8,12 +8,12 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String   @id @default(uuid()) /// 고유 식별자
+  email     String   @unique /// 이메일
+  password  String   /// 비밀번호
+  name      String?  /// 이름
+  createdAt DateTime @default(now()) /// 생성일시
+  updatedAt DateTime @updatedAt /// 수정일시
 
-  @@map("MIN_User")
+  @@map("MIN_AUTH_USER")
 }

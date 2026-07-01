@@ -54,6 +54,10 @@ function LoginForm() {
           Welcome Back
         </h1>
         <p className="text-gray-300 text-sm">통합 인증 시스템에 로그인하세요</p>
+        <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/10 text-sm text-gray-300 inline-block text-left">
+          <p className="font-semibold mb-1 text-purple-300">테스트 계정</p>
+          <p>test@test.com / test1234!</p>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
