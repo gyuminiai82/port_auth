@@ -2,11 +2,273 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator client_shop {
+  provider = "prisma-client-js"
+  output   = "../../port_shop/src/lib/generated/prisma"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+model MIN_SHOP_USER {
+  id            String   @id @default(uuid()) // SSO User ID와 매핑
+  email         String   @unique
+  name          String?
+  phone         String?  /// 연락처
+  zipcode       String?  /// 우편번호
+  address       String?  /// 기본 주소
+  detailAddress String?  /// 상세 주소
+  tier          String   @default("BRONZE")
+  points        Int      @default(0)
+  totalSpent    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  pointLogs     MIN_SHOP_POINT_LOG[]
+}
+
+model MIN_SHOP_CATEGORY {
+  id        String   @id @default(uuid())
+  name      String
+  parentId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parent   MIN_SHOP_CATEGORY?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children MIN_SHOP_CATEGORY[] @relation("CategoryHierarchy")
+  products MIN_SHOP_PRODUCT[]
+}
+
+model MIN_SHOP_PRODUCT {
+  id          String   @id @default(uuid())
+  categoryId  String?
+  name        String
+  description String?  @db.Text
+  price       Int
+  stock       Int      @default(0)
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category   MIN_SHOP_CATEGORY?        @relation(fields: [categoryId], references: [id])
+  images     MIN_SHOP_PRODUCT_IMAGE[]
+  options    MIN_SHOP_PRODUCT_OPTION[]
+  reviews    MIN_SHOP_REVIEW[]
+  cartItems  MIN_SHOP_CART_ITEM[]
+  orderItems MIN_SHOP_ORDER_ITEM[]
+  wishlists  MIN_SHOP_WISHLIST_ITEM[]
+}
+
+model MIN_SHOP_PRODUCT_IMAGE {
+  id        String   @id @default(uuid())
+  productId String
+  url       String
+  isMain    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  product MIN_SHOP_PRODUCT @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model MIN_SHOP_PRODUCT_OPTION {
+  id        String   @id @default(uuid())
+  productId String
+  name      String // 예: "색상", "사이즈"
+  value     String // 예: "레드", "XL"
+  addPrice  Int      @default(0) // 옵션 추가금
+  stock     Int      @default(0) // 옵션별 재고
+  createdAt DateTime @default(now())
+
+  product    MIN_SHOP_PRODUCT      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems  MIN_SHOP_CART_ITEM[]
+  orderItems MIN_SHOP_ORDER_ITEM[]
+}
+
+model MIN_SHOP_REVIEW {
+  id        String   @id @default(uuid())
+  productId String
+  userId    String
+  rating    Int      @default(5)
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product MIN_SHOP_PRODUCT @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model MIN_SHOP_WISHLIST {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items MIN_SHOP_WISHLIST_ITEM[]
+}
+
+model MIN_SHOP_WISHLIST_ITEM {
+  id         String   @id @default(uuid())
+  wishlistId String
+  productId  String
+  createdAt  DateTime @default(now())
+
+  wishlist MIN_SHOP_WISHLIST @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  product  MIN_SHOP_PRODUCT  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([wishlistId, productId])
+}
+
+model MIN_SHOP_CART {
+  id        String          @id @default(uuid())
+  userId    String          @unique
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  items     MIN_SHOP_CART_ITEM[]
+}
+
+model MIN_SHOP_CART_ITEM {
+  id        String   @id @default(uuid())
+  cartId    String
+  productId String
+  optionId  String? // 선택된 옵션
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart    MIN_SHOP_CART            @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product MIN_SHOP_PRODUCT         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  option  MIN_SHOP_PRODUCT_OPTION? @relation(fields: [optionId], references: [id])
+
+  @@unique([cartId, productId, optionId])
+}
+
+model MIN_SHOP_ORDER {
+  id           String   @id @default(uuid())
+  userId       String
+  totalAmount  Int
+  refundAmount Int      @default(0) // 환불된 총 금액
+  usedPoints   Int      @default(0) // 결제 시 사용한 포인트
+  earnedPoints Int      @default(0) // 결제 완료 시 적립된 포인트
+  status       String   @default("PENDING") // PENDING, PAID, CANCELLED 등
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  items    MIN_SHOP_ORDER_ITEM[]
+  payment  MIN_SHOP_PAYMENT?
+  delivery MIN_SHOP_DELIVERY?
+}
+
+model MIN_SHOP_ORDER_ITEM {
+  id        String   @id @default(uuid())
+  orderId   String
+  productId String
+  optionId  String?
+  quantity  Int
+  price     Int
+  status    String   @default("ACTIVE") // ACTIVE, CANCELLED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order   MIN_SHOP_ORDER           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product MIN_SHOP_PRODUCT         @relation(fields: [productId], references: [id])
+  option  MIN_SHOP_PRODUCT_OPTION? @relation(fields: [optionId], references: [id])
+}
+
+model MIN_SHOP_PAYMENT {
+  id            String    @id @default(uuid())
+  orderId       String    @unique
+  method        String // CARD, TOSS, VIRTUAL_ACCOUNT 등
+  amount        Int
+  transactionId String? // PG사 고유 거래 번호
+  status        String    @default("COMPLETED") // COMPLETED, FAILED, REFUNDED
+  paidAt        DateTime?
+  createdAt     DateTime  @default(now())
+
+  order MIN_SHOP_ORDER @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model MIN_SHOP_DELIVERY {
+  id          String    @id @default(uuid())
+  orderId     String    @unique
+  recipient   String
+  address     String
+  trackingNo  String?
+  status      String    @default("PREPARING") // PREPARING, SHIPPING, DELIVERED
+  shippedAt   DateTime?
+  deliveredAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  order MIN_SHOP_ORDER @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model MIN_SHOP_COUPON {
+  id           String   @id @default(uuid())
+  name         String
+  discountRate Int      @default(0) // 퍼센트 할인
+  discountAmt  Int      @default(0) // 정액 할인
+  minOrderAmt  Int      @default(0) // 최소 주문 금액
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  userCoupons MIN_SHOP_USER_COUPON[]
+}
+
+model MIN_SHOP_USER_COUPON {
+  id        String    @id @default(uuid())
+  userId    String
+  couponId  String
+  isUsed    Boolean   @default(false)
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  coupon MIN_SHOP_COUPON @relation(fields: [couponId], references: [id])
+}
+
+model MIN_SHOP_ADMIN {
+  id           String   @id @default(uuid()) /// 관리자 고유 ID
+  email        String   @unique /// 관리자 이메일(로그인)
+  password     String /// 비밀번호
+  name         String /// 관리자 이름
+  role         String   @default("ADMIN") /// 권한
+  isSuperAdmin Boolean  @default(false) /// 최고 관리자 여부
+  permissions  String[] /// 부여된 메뉴 접근 권한 배열 (PostgreSQL 배열 타입)
+  createdAt    DateTime @default(now()) /// 계정 생성일시
+  updatedAt    DateTime @updatedAt /// 계정 수정일시
+}
+
+model MIN_SHOP_NOTICE {
+  id        String   @id @default(uuid()) /// 공지사항 고유 번호
+  title     String   /// 제목
+  content   String   @db.Text /// 내용
+  viewCount Int      @default(0) /// 조회수
+  createdAt DateTime @default(now()) /// 작성일시
+  updatedAt DateTime @updatedAt /// 수정일시
+}
+
+model MIN_SHOP_INQUIRY {
+  id        String   @id @default(uuid()) /// 1:1 문의 고유 번호
+  userId    String   /// 작성자(유저) ID
+  type      String   /// 문의 유형 (예: 배송, 교환/반품, 기타)
+  title     String   /// 문의 제목
+  content   String   @db.Text /// 문의 내용
+  status    String   @default("PENDING") /// 처리 상태 (PENDING, ANSWERED)
+  answer    String?  @db.Text /// 관리자 답변
+  createdAt DateTime @default(now()) /// 작성일시
+  updatedAt DateTime @updatedAt /// 수정일시
+}
+
+model MIN_SHOP_POINT_LOG {
+  id        String   @id @default(uuid()) /// 로그 고유 ID
+  userId    String   /// 유저 ID
+  amount    Int      /// 변동액 (양수는 적립, 음수는 차감)
+  reason    String   /// 변동 사유
+  createdAt DateTime @default(now()) /// 발생 일시
+
+  user      MIN_SHOP_USER @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// === 공통 통합 인증 서버 모델 (port_auth) ===
 model User {
   id        String   @id @default(uuid()) /// 고유 식별자
   email     String   @unique /// 이메일
