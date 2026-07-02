@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { redis } from '@/lib/redis';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 /**
  * @swagger
