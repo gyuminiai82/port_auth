@@ -9,8 +9,8 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirect') || '/';
   
-  const [email, setEmail] = useState('test@test.com');
-  const [password, setPassword] = useState('test1234!');
+  const [email, setEmail] = useState('user1@test.com');
+  const [password, setPassword] = useState('password123');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -56,7 +56,7 @@ function LoginForm() {
         <p className="text-gray-300 text-sm">통합 인증 시스템에 로그인하세요</p>
         <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/10 text-sm text-gray-300 inline-block text-left">
           <p className="font-semibold mb-1 text-purple-300">테스트 계정</p>
-          <p>test@test.com / test1234!</p>
+          <p>user1@test.com / password123</p>
         </div>
       </div>
 
