@@ -28,8 +28,5 @@ jobs:
             # GitHub Secrets에 ENV_FILE이 제대로 설정되어 있지 않으면 빈 파일이 되어 서버가 터지므로 주석 처리합니다.
             # echo "${{ secrets.ENV_FILE }}" > .env
             
-            # 4. 데이터베이스 스키마 반영 (실서버 DB에 테이블 생성/업데이트)
-            docker run --rm -v $(pwd):/app -w /app --network proxy-network --env-file .env node:20-alpine sh -c "npm install prisma@5.22.0 && npx prisma db push --accept-data-loss"
-            
-            # 5. 도커 컨테이너 빌드 및 재시작
+            # 4. 도커 컨테이너 빌드 및 재시작
             docker compose up -d --build
